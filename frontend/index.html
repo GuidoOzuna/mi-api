@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mi Página en Vercel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    h1 {
+      color: #333;
+    }
+    #mensaje {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #0070f3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenido Guido 🚀</h1>
+  <p>Probando conexión con la API en Vercel:</p>
+  <div id="mensaje">Cargando...</div>
+
+  <script>
+    // Cambiá la URL si tu API está en otro dominio
+    fetch("/api/hola")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("mensaje").textContent = data.mensaje;
+      })
+      .catch(err => {
+        document.getElementById("mensaje").textContent = "Error al conectar con la API";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
