@@ -1,16 +1,12 @@
 {
-  "name": "mi-api",
+  "name": "mi-juego",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Juego simple con Node.js API y frontend en Vercel",
+  "main": "api/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node api/index.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^4.18.2"
   }
 }
