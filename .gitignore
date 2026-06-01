@@ -1,0 +1,27 @@
+# Dependencias
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Cache y compilados
+.cache/
+dist/
+build/
+
+# Configuración de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de Vercel (se generan automáticamente)
+.vercel
+
+# Mantener carpeta public (NO ignorar)
+# public/
