@@ -40,19 +40,29 @@ app.post("/api/jugadores", (req, res) => {
   res.json({ id, pos: jugadores[id] });
 });
 
-// Obtener jugadores (limpia duplicados inactivos)
+// Obtener jugadores (limpia duplicados viejos, no el activo)
 app.get("/api/jugadores", (req, res) => {
   const ahora = Date.now();
-  const ids = Object.keys(jugadores);
-  const vistos = new Set();
 
-  for (let id of ids) {
-    if (vistos.has(id)) {
-      if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
-        delete jugadores[id];
+  // Agrupar jugadores por ID
+  const agrupados = {};
+  for (let id in jugadores) {
+    if (!agrupados[id]) agrupados[id] = [];
+    agrupados[id].push(jugadores[id]);
+  }
+
+  // Mantener solo el más reciente por ID
+  for (let id in agrupados) {
+    if (agrupados[id].length > 1) {
+      agrupados[id].sort((a, b) => b.lastUpdate - a.lastUpdate);
+      // el primero es el activo
+      jugadores[id] = agrupados[id][0];
+      // eliminar duplicados viejos si pasaron 30s
+      for (let i = 1; i < agrupados[id].length; i++) {
+        if (ahora - agrupados[id][i].lastUpdate > TIEMPO_MAX) {
+          delete agrupados[id][i];
+        }
       }
-    } else {
-      vistos.add(id);
     }
   }
 
@@ -83,7 +93,7 @@ app.post("/api/mover", (req, res) => {
   res.json(jugadores[id]);
 });
 
-// Chat: enviar mensaje
+// Chat
 app.post("/api/chat", (req, res) => {
   const { nombre, texto } = req.body;
   if (!texto || !nombre) return res.status(400).json({ error: "Falta nombre o texto" });
@@ -95,12 +105,11 @@ app.post("/api/chat", (req, res) => {
   res.json({ ok: true });
 });
 
-// Chat: obtener mensajes
 app.get("/api/chat", (req, res) => {
   res.json(mensajes);
 });
 
-// 🔄 Reset jugadores (solo Guido)
+// Reset jugadores (solo Guido)
 app.post("/api/reset", (req, res) => {
   jugadores = {};
   mensajes.push({ nombre: "Sistema", texto: "⚠️ Guido ha reseteado todos los jugadores", tiempo: Date.now() });
