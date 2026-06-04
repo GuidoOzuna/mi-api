@@ -9,7 +9,7 @@ app.use("/api/img", express.static(path.join(__dirname, "img")));
 app.get("/api/mapa", (req, res) => res.json(mapa));
 
 let jugadores = {};
-let mensajes = []; // 🟢 lista de mensajes del chat
+let mensajes = [];
 const TIEMPO_MAX = 30 * 1000;
 
 // Generar posición aleatoria sobre césped (1)
@@ -83,23 +83,28 @@ app.post("/api/mover", (req, res) => {
   res.json(jugadores[id]);
 });
 
-// 🟢 Chat: enviar mensaje
+// Chat: enviar mensaje
 app.post("/api/chat", (req, res) => {
   const { nombre, texto } = req.body;
   if (!texto || !nombre) return res.status(400).json({ error: "Falta nombre o texto" });
 
   const mensaje = { nombre, texto, tiempo: Date.now() };
   mensajes.push(mensaje);
-
-  // mantener solo los últimos 50 mensajes
   if (mensajes.length > 50) mensajes.shift();
 
   res.json({ ok: true });
 });
 
-// 🟢 Chat: obtener mensajes
+// Chat: obtener mensajes
 app.get("/api/chat", (req, res) => {
   res.json(mensajes);
+});
+
+// 🔄 Reset jugadores (solo Guido)
+app.post("/api/reset", (req, res) => {
+  jugadores = {};
+  mensajes.push({ nombre: "Sistema", texto: "⚠️ Guido ha reseteado todos los jugadores", tiempo: Date.now() });
+  res.json({ ok: true });
 });
 
 module.exports = app;
