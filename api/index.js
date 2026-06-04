@@ -29,12 +29,15 @@ function generarPosicion() {
   return { x, y };
 }
 
-// Crear jugador
+// Crear jugador (solo si no existe)
 app.post("/api/jugadores", (req, res) => {
-  const id = req.body.id || Date.now().toString();
-  const pos = generarPosicion();
-  jugadores[id] = pos;
-  res.json({ id, pos });
+  const id = req.body.id;
+  if (!id) return res.status(400).json({ error: "Falta ID" });
+
+  if (!jugadores[id]) {
+    jugadores[id] = generarPosicion();
+  }
+  res.json({ id, pos: jugadores[id] });
 });
 
 // Obtener jugadores
