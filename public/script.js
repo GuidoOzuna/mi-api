@@ -7,7 +7,7 @@ let jugadores = {};
 let miId = null;
 
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.jpeg";
+imgCesped.src = "/api/img/cesped.png";
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
 const imgPersonaje = new Image();
@@ -21,6 +21,29 @@ function obtenerId() {
     localStorage.setItem("miJugadorId", id);
   }
   return id;
+}
+
+// Dibujar mapa fijo (césped + muros)
+function dibujarMapaBase() {
+  for (let y = 0; y < mapa.length; y++) {
+    for (let x = 0; x < mapa[y].length; x++) {
+      ctx.drawImage(imgCesped, x * size, y * size, size, size);
+      if (mapa[y][x] === 2) {
+        ctx.drawImage(imgMuro, x * size, y * size, size, size);
+      }
+    }
+  }
+}
+
+// Dibujar solo jugadores
+function dibujarJugadores() {
+  // limpiar solo la capa de jugadores
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  dibujarMapaBase();
+  for (let id in jugadores) {
+    const p = jugadores[id];
+    ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
+  }
 }
 
 // Cargar mapa y registrar jugador
@@ -46,24 +69,8 @@ function actualizarJugadores() {
     .then(res => res.json())
     .then(data => {
       jugadores = data;
-      dibujarMapa();
+      dibujarJugadores();
     });
-}
-
-function dibujarMapa() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let y = 0; y < mapa.length; y++) {
-    for (let x = 0; x < mapa[y].length; x++) {
-      ctx.drawImage(imgCesped, x * size, y * size, size, size);
-      if (mapa[y][x] === 2) {
-        ctx.drawImage(imgMuro, x * size, y * size, size, size);
-      }
-    }
-  }
-  for (let id in jugadores) {
-    const p = jugadores[id];
-    ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
-  }
 }
 
 function mover(dx, dy) {
