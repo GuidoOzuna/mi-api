@@ -1,22 +1,31 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Mi Juego en Node.js 🚀</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Juego</title>
+  <style>
+    #menu {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-family: sans-serif;
+    }
+    #game { display: none; }
+  </style>
 </head>
 <body>
-  <h1>Mi Juego en Node.js 🚀</h1>
-  <canvas id="game" width="250" height="250"></canvas>
-
-  <!-- Cruceta de control -->
-  <div id="controls">
-    <button onclick="mover(0,-1)">⬆️</button><br>
-    <button onclick="mover(-1,0)">⬅️</button>
-    <button onclick="mover(1,0)">➡️</button><br>
-    <button onclick="mover(0,1)">⬇️</button>
+  <div id="menu">
+    <h1>Start</h1>
+    <input id="nombre" placeholder="Tu nombre" style="display:none;">
+    <button id="btnStart">Comenzar</button>
+    <p id="mensaje"></p>
   </div>
-
+  <canvas id="game"></canvas>
   <script src="script.js"></script>
 </body>
 </html>
