@@ -9,7 +9,7 @@ app.use("/api/img", express.static(path.join(__dirname, "img")));
 app.get("/api/mapa", (req, res) => res.json(mapa));
 
 let jugadores = {};
-const TIEMPO_MAX = 30 * 1000; // 30 segundos de inactividad
+const TIEMPO_MAX = 30 * 1000; // 30 segundos
 
 function generarPosicion() {
   let x, y;
@@ -33,17 +33,24 @@ app.post("/api/jugadores", (req, res) => {
   } else {
     jugadores[id].lastUpdate = Date.now();
   }
+
   res.json({ id, pos: jugadores[id] });
 });
 
-// Obtener jugadores (limpia inactivos)
+// Obtener jugadores (limpia duplicados inactivos)
 app.get("/api/jugadores", (req, res) => {
   const ahora = Date.now();
-  for (let id in jugadores) {
+
+  // Buscar IDs duplicados
+  const ids = Object.keys(jugadores);
+  const duplicados = ids.filter((id, idx) => ids.indexOf(id) !== idx);
+
+  for (let id of duplicados) {
     if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
       delete jugadores[id];
     }
   }
+
   res.json(jugadores);
 });
 
