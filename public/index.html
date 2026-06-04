@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Juego</title>
+  <title>Juego Multijugador REST</title>
   <style>
+    body {
+      background: black;
+      color: white;
+      font-family: sans-serif;
+      text-align: center;
+      margin: 0;
+      overflow: hidden;
+    }
     #menu {
       position: absolute;
       top: 0; left: 0;
@@ -12,10 +20,30 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      color: white;
-      font-family: sans-serif;
     }
-    #game { display: none; }
+    #game { display: none; margin-top: 10px; }
+    #jugadoresConectados {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #0f0;
+    }
+    #controls {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    #controls button {
+      font-size: 24px;
+      width: 60px;
+      height: 60px;
+      margin: 5px;
+      border-radius: 10px;
+      background: #222;
+      color: white;
+      border: 2px solid #555;
+    }
   </style>
 </head>
 <body>
@@ -25,7 +53,21 @@
     <button id="btnStart">Comenzar</button>
     <p id="mensaje"></p>
   </div>
+
   <canvas id="game"></canvas>
+  <div id="jugadoresConectados"></div>
+
+  <div id="controls">
+    <div>
+      <button id="up">⬆️</button>
+    </div>
+    <div>
+      <button id="left">⬅️</button>
+      <button id="down">⬇️</button>
+      <button id="right">➡️</button>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
