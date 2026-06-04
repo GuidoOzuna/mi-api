@@ -1,79 +1,85 @@
-const express = require("express");
-const path = require("path");
-const mapa = require("./mapa.json");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const size = 50;
 
-const app = express();
-app.use(express.json());
-
-app.use("/api/img", express.static(path.join(__dirname, "img")));
-app.get("/api/mapa", (req, res) => res.json(mapa));
-
+let mapa = [];
 let jugadores = {};
-const TIEMPO_MAX = 30 * 1000; // 30 segundos
+let miId = null;
 
-function generarPosicion() {
-  let x, y;
-  do {
-    y = Math.floor(Math.random() * mapa.length);
-    x = Math.floor(Math.random() * mapa[0].length);
-  } while (
-    mapa[y][x] !== 1 ||
-    Object.values(jugadores).some(p => p.x === x && p.y === y)
-  );
-  return { x, y };
+const imgCesped = new Image();
+imgCesped.src = "/api/img/cesped.png";
+const imgMuro = new Image();
+imgMuro.src = "/api/img/muro.png";
+const imgPersonaje = new Image();
+imgPersonaje.src = "/api/img/personaje.png";
+
+// Obtener o crear ID único por dispositivo
+function obtenerId() {
+  let id = localStorage.getItem("miJugadorId");
+  if (!id) {
+    id = Date.now().toString() + Math.floor(Math.random() * 1000);
+    localStorage.setItem("miJugadorId", id);
+  }
+  return id;
 }
 
-// Crear jugador o devolver existente
-app.post("/api/jugadores", (req, res) => {
-  const id = req.body.id;
-  if (!id) return res.status(400).json({ error: "Falta ID" });
+// Cargar mapa y registrar jugador
+fetch("/api/mapa")
+  .then(res => res.json())
+  .then(data => {
+    mapa = data;
+    canvas.width = mapa[0].length * size;
+    canvas.height = mapa.length * size;
 
-  if (!jugadores[id]) {
-    jugadores[id] = { ...generarPosicion(), lastUpdate: Date.now() };
-  } else {
-    jugadores[id].lastUpdate = Date.now();
-  }
+    miId = obtenerId();
+    return fetch("/api/jugadores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: miId })
+    });
+  })
+  .then(() => actualizarJugadores())
+  .catch(err => console.error("Error:", err));
 
-  res.json({ id, pos: jugadores[id] });
-});
+function actualizarJugadores() {
+  fetch("/api/jugadores")
+    .then(res => res.json())
+    .then(data => {
+      jugadores = data;
+      dibujarMapa();
+    });
+}
 
-// Obtener jugadores (limpia duplicados inactivos)
-app.get("/api/jugadores", (req, res) => {
-  const ahora = Date.now();
-
-  // Buscar IDs duplicados
-  const ids = Object.keys(jugadores);
-  const duplicados = ids.filter((id, idx) => ids.indexOf(id) !== idx);
-
-  for (let id of duplicados) {
-    if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
-      delete jugadores[id];
+function dibujarMapa() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let y = 0; y < mapa.length; y++) {
+    for (let x = 0; x < mapa[y].length; x++) {
+      ctx.drawImage(imgCesped, x * size, y * size, size, size);
+      if (mapa[y][x] === 2) {
+        ctx.drawImage(imgMuro, x * size, y * size, size, size);
+      }
     }
   }
-
-  res.json(jugadores);
-});
-
-// Mover jugador
-app.post("/api/mover", (req, res) => {
-  const { id, dx, dy } = req.body;
-  const jugador = jugadores[id];
-  if (!jugador) return res.status(404).json({ error: "Jugador no encontrado" });
-
-  const nuevoX = jugador.x + dx;
-  const nuevoY = jugador.y + dy;
-
-  if (
-    nuevoY >= 0 &&
-    nuevoY < mapa.length &&
-    nuevoX >= 0 &&
-    nuevoX < mapa[0].length &&
-    mapa[nuevoY][nuevoX] === 1
-  ) {
-    jugadores[id] = { x: nuevoX, y: nuevoY, lastUpdate: Date.now() };
+  for (let id in jugadores) {
+    const p = jugadores[id];
+    ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
   }
+}
 
-  res.json(jugadores[id]);
+function mover(dx, dy) {
+  fetch("/api/mover", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: miId, dx, dy })
+  }).then(() => actualizarJugadores());
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowUp") mover(0, -1);
+  if (e.key === "ArrowDown") mover(0, 1);
+  if (e.key === "ArrowLeft") mover(-1, 0);
+  if (e.key === "ArrowRight") mover(1, 0);
 });
 
-module.exports = app;
+// Refrescar jugadores cada 2 segundos
+setInterval(actualizarJugadores, 2000);
