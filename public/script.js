@@ -21,6 +21,8 @@ fetch("/api/mapa")
         if (mapa[y][x] === 0) {
           personaje.x = x;
           personaje.y = y;
+          // Convertir la celda inicial en césped para que no quede blanca
+          mapa[y][x] = 1;
         }
       }
     }
@@ -45,7 +47,7 @@ function dibujarMapa() {
       ctx.strokeRect(x * size, y * size, size, size);
     }
   }
-  // Dibujar personaje
+  // Dibujar personaje encima
   ctx.fillStyle = "blue";
   ctx.fillRect(personaje.x * size, personaje.y * size, size, size);
 }
