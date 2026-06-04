@@ -5,19 +5,12 @@ const mapa = require("./mapa.json");
 const app = express();
 app.use(express.json());
 
-// Servir imágenes desde /api/img
 app.use("/api/img", express.static(path.join(__dirname, "img")));
+app.get("/api/mapa", (req, res) => res.json(mapa));
 
-// Endpoint para mapa
-app.get("/api/mapa", (req, res) => {
-  res.json(mapa);
-});
-
-// Lista de jugadores en memoria
 let jugadores = {};
 const TIEMPO_MAX = 30 * 1000; // 30 segundos
 
-// Generar posición aleatoria sobre césped (1)
 function generarPosicion() {
   let x, y;
   do {
@@ -32,13 +25,14 @@ function generarPosicion() {
 
 // Crear jugador o devolver existente
 app.post("/api/jugadores", (req, res) => {
-  const id = req.body.id;
+  const { id, nombre } = req.body;
   if (!id) return res.status(400).json({ error: "Falta ID" });
 
   if (!jugadores[id]) {
-    jugadores[id] = { ...generarPosicion(), lastUpdate: Date.now() };
+    jugadores[id] = { ...generarPosicion(), nombre: nombre || "Jugador", lastUpdate: Date.now() };
   } else {
-    jugadores[id].lastUpdate = Date.now(); // siempre actualizar
+    jugadores[id].lastUpdate = Date.now();
+    if (nombre) jugadores[id].nombre = nombre; // actualizar nombre si lo manda
   }
 
   res.json({ id, pos: jugadores[id] });
@@ -52,7 +46,6 @@ app.get("/api/jugadores", (req, res) => {
   const vistos = new Set();
   for (let id of ids) {
     if (vistos.has(id)) {
-      // si hay duplicados, limpiar los viejos
       if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
         delete jugadores[id];
       }
@@ -80,9 +73,9 @@ app.post("/api/mover", (req, res) => {
     nuevoX < mapa[0].length &&
     mapa[nuevoY][nuevoX] === 1
   ) {
-    jugadores[id] = { x: nuevoX, y: nuevoY, lastUpdate: Date.now() };
+    jugadores[id] = { ...jugador, x: nuevoX, y: nuevoY, lastUpdate: Date.now() };
   } else {
-    jugadores[id].lastUpdate = Date.now(); // incluso si no se mueve
+    jugadores[id].lastUpdate = Date.now();
   }
 
   res.json(jugadores[id]);
