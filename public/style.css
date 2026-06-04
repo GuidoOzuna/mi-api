@@ -15,3 +15,13 @@ canvas {
   background-color: #fff;
   margin-top: 20px;
 }
+
+#controls {
+  margin-top: 20px;
+}
+
+#controls button {
+  font-size: 24px;
+  padding: 10px 20px;
+  margin: 5px;
+}
