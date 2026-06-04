@@ -2,12 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Juego en Node.js</title>
+  <title>Mi Juego en Node.js 🚀</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>Mi Juego en Node.js 🚀</h1>
   <canvas id="game" width="250" height="250"></canvas>
-  <script src="/script.js"></script>
+
+  <!-- Cruceta de control -->
+  <div id="controls">
+    <button onclick="mover(0,-1)">⬆️</button><br>
+    <button onclick="mover(-1,0)">⬅️</button>
+    <button onclick="mover(1,0)">➡️</button><br>
+    <button onclick="mover(0,1)">⬇️</button>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
