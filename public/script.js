@@ -31,7 +31,7 @@ fetch("/api/mapa")
         if (mapa[y][x] === 0) {
           personaje.x = x;
           personaje.y = y;
-          mapa[y][x] = 1; // convertir en césped
+          mapa[y][x] = 1; // convertir en césped para que no quede blanco
         }
       }
     }
@@ -49,14 +49,14 @@ function dibujarMapa() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let y = 0; y < mapa.length; y++) {
     for (let x = 0; x < mapa[y].length; x++) {
-      if (mapa[y][x] === 1) {
-        ctx.drawImage(imgCesped, x * size, y * size, size, size);
-      } else if (mapa[y][x] === 2) {
+      // Dibujar césped en todas las celdas
+      ctx.drawImage(imgCesped, x * size, y * size, size, size);
+
+      // Si hay muro, dibujarlo encima
+      if (mapa[y][x] === 2) {
         ctx.drawImage(imgMuro, x * size, y * size, size, size);
-      } else {
-        ctx.fillStyle = "white";
-        ctx.fillRect(x * size, y * size, size, size);
       }
+
       ctx.strokeRect(x * size, y * size, size, size);
     }
   }
@@ -67,13 +67,23 @@ function dibujarMapa() {
 function mover(dx, dy) {
   const nuevoX = personaje.x + dx;
   const nuevoY = personaje.y + dy;
-  if (mapa[nuevoY] && mapa[nuevoY][nuevoX] === 1) {
+
+  // Verificar límites y evitar muros
+  if (
+    nuevoY >= 0 &&
+    nuevoY < mapa.length &&
+    nuevoX >= 0 &&
+    nuevoX < mapa[0].length &&
+    mapa[nuevoY][nuevoX] !== 2 // no puede pasar sobre muro
+  ) {
     personaje.x = nuevoX;
     personaje.y = nuevoY;
   }
+
   dibujarMapa();
 }
 
+// Movimiento con teclado
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") mover(0, -1);
   if (e.key === "ArrowDown") mover(0, 1);
