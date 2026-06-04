@@ -5,18 +5,12 @@ const mapa = require("./mapa.json");
 const app = express();
 app.use(express.json());
 
-// Servir imágenes desde /api/img
 app.use("/api/img", express.static(path.join(__dirname, "img")));
+app.get("/api/mapa", (req, res) => res.json(mapa));
 
-// Endpoint para mapa
-app.get("/api/mapa", (req, res) => {
-  res.json(mapa);
-});
-
-// Lista de jugadores en memoria
 let jugadores = {};
+const TIEMPO_MAX = 30 * 1000; // 30 segundos de inactividad
 
-// Generar posición aleatoria sobre césped (1)
 function generarPosicion() {
   let x, y;
   do {
@@ -29,19 +23,27 @@ function generarPosicion() {
   return { x, y };
 }
 
-// Crear jugador (solo si no existe)
+// Crear jugador o devolver existente
 app.post("/api/jugadores", (req, res) => {
   const id = req.body.id;
   if (!id) return res.status(400).json({ error: "Falta ID" });
 
   if (!jugadores[id]) {
-    jugadores[id] = generarPosicion();
+    jugadores[id] = { ...generarPosicion(), lastUpdate: Date.now() };
+  } else {
+    jugadores[id].lastUpdate = Date.now();
   }
   res.json({ id, pos: jugadores[id] });
 });
 
-// Obtener jugadores
+// Obtener jugadores (limpia inactivos)
 app.get("/api/jugadores", (req, res) => {
+  const ahora = Date.now();
+  for (let id in jugadores) {
+    if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
+      delete jugadores[id];
+    }
+  }
   res.json(jugadores);
 });
 
@@ -61,7 +63,7 @@ app.post("/api/mover", (req, res) => {
     nuevoX < mapa[0].length &&
     mapa[nuevoY][nuevoX] === 1
   ) {
-    jugadores[id] = { x: nuevoX, y: nuevoY };
+    jugadores[id] = { x: nuevoX, y: nuevoY, lastUpdate: Date.now() };
   }
 
   res.json(jugadores[id]);
