@@ -4,6 +4,7 @@ const size = 50;
 
 let mapa = [];
 let jugadores = {};
+let miId = null;
 
 const imgCesped = new Image();
 imgCesped.src = "/api/img/cesped.jpeg";
@@ -14,16 +15,7 @@ imgMuro.src = "/api/img/muro.png";
 const imgPersonaje = new Image();
 imgPersonaje.src = "/api/img/personaje.png";
 
-// Conectar con Socket.IO
-const socket = io();
-
-// Recibir lista de jugadores
-socket.on("jugadores", (data) => {
-  jugadores = data;
-  dibujarMapa();
-});
-
-// Cargar mapa desde la API
+// Cargar mapa y crear jugador
 fetch("/api/mapa")
   .then(res => res.json())
   .then(data => {
@@ -31,14 +23,24 @@ fetch("/api/mapa")
     canvas.width = mapa[0].length * size;
     canvas.height = mapa.length * size;
 
-    // Esperar a que las imágenes se carguen antes de dibujar
-    Promise.all([
-      new Promise(res => imgCesped.onload = res),
-      new Promise(res => imgMuro.onload = res),
-      new Promise(res => imgPersonaje.onload = res)
-    ]).then(() => dibujarMapa());
+    miId = Date.now().toString();
+    return fetch("/api/jugadores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: miId })
+    });
   })
-  .catch(err => console.error("Error cargando mapa:", err));
+  .then(() => actualizarJugadores())
+  .catch(err => console.error("Error:", err));
+
+function actualizarJugadores() {
+  fetch("/api/jugadores")
+    .then(res => res.json())
+    .then(data => {
+      jugadores = data;
+      dibujarMapa();
+    });
+}
 
 function dibujarMapa() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -50,7 +52,6 @@ function dibujarMapa() {
       }
     }
   }
-  // Dibujar todos los jugadores
   for (let id in jugadores) {
     const p = jugadores[id];
     ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
@@ -58,7 +59,12 @@ function dibujarMapa() {
 }
 
 function mover(dx, dy) {
-  socket.emit("mover", { dx, dy });
+  fetch("/api/mover", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: miId, dx, dy })
+  })
+    .then(() => actualizarJugadores());
 }
 
 document.addEventListener("keydown", (e) => {
@@ -67,3 +73,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") mover(-1, 0);
   if (e.key === "ArrowRight") mover(1, 0);
 });
+
+// Refrescar jugadores cada 2 segundos
+setInterval(actualizarJugadores, 2000);
