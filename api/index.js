@@ -1,85 +1,82 @@
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-const size = 50;
+const express = require("express");
+const path = require("path");
+const mapa = require("./mapa.json");
 
-let mapa = [];
+const app = express();
+app.use(express.json());
+
+app.use("/api/img", express.static(path.join(__dirname, "img")));
+app.get("/api/mapa", (req, res) => res.json(mapa));
+
 let jugadores = {};
-let miId = null;
+const TIEMPO_MAX = 30 * 1000; // 30 segundos
 
-const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.png";
-const imgMuro = new Image();
-imgMuro.src = "/api/img/muro.png";
-const imgPersonaje = new Image();
-imgPersonaje.src = "/api/img/personaje.png";
+function generarPosicion() {
+  let x, y;
+  do {
+    y = Math.floor(Math.random() * mapa.length);
+    x = Math.floor(Math.random() * mapa[0].length);
+  } while (
+    mapa[y][x] !== 1 ||
+    Object.values(jugadores).some(p => p.x === x && p.y === y)
+  );
+  return { x, y };
+}
 
-// Obtener o crear ID único por dispositivo
-function obtenerId() {
-  let id = localStorage.getItem("miJugadorId");
-  if (!id) {
-    id = Date.now().toString() + Math.floor(Math.random() * 1000);
-    localStorage.setItem("miJugadorId", id);
+// Crear jugador o devolver existente
+app.post("/api/jugadores", (req, res) => {
+  const id = req.body.id;
+  if (!id) return res.status(400).json({ error: "Falta ID" });
+
+  if (!jugadores[id]) {
+    jugadores[id] = { ...generarPosicion(), lastUpdate: Date.now() };
+  } else {
+    jugadores[id].lastUpdate = Date.now();
   }
-  return id;
-}
 
-// Cargar mapa y registrar jugador
-fetch("/api/mapa")
-  .then(res => res.json())
-  .then(data => {
-    mapa = data;
-    canvas.width = mapa[0].length * size;
-    canvas.height = mapa.length * size;
-
-    miId = obtenerId();
-    return fetch("/api/jugadores", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: miId })
-    });
-  })
-  .then(() => actualizarJugadores())
-  .catch(err => console.error("Error:", err));
-
-function actualizarJugadores() {
-  fetch("/api/jugadores")
-    .then(res => res.json())
-    .then(data => {
-      jugadores = data;
-      dibujarMapa();
-    });
-}
-
-function dibujarMapa() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  for (let y = 0; y < mapa.length; y++) {
-    for (let x = 0; x < mapa[y].length; x++) {
-      ctx.drawImage(imgCesped, x * size, y * size, size, size);
-      if (mapa[y][x] === 2) {
-        ctx.drawImage(imgMuro, x * size, y * size, size, size);
-      }
-    }
-  }
-  for (let id in jugadores) {
-    const p = jugadores[id];
-    ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
-  }
-}
-
-function mover(dx, dy) {
-  fetch("/api/mover", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: miId, dx, dy })
-  }).then(() => actualizarJugadores());
-}
-
-document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowUp") mover(0, -1);
-  if (e.key === "ArrowDown") mover(0, 1);
-  if (e.key === "ArrowLeft") mover(-1, 0);
-  if (e.key === "ArrowRight") mover(1, 0);
+  res.json({ id, pos: jugadores[id] });
 });
 
-// Refrescar jugadores cada 2 segundos
-setInterval(actualizarJugadores, 2000);
+// Obtener jugadores (limpia duplicados inactivos)
+app.get("/api/jugadores", (req, res) => {
+  const ahora = Date.now();
+  const ids = Object.keys(jugadores);
+
+  // Si hay duplicados con mismo ID, limpiar los viejos
+  const vistos = new Set();
+  for (let id of ids) {
+    if (vistos.has(id)) {
+      if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
+        delete jugadores[id];
+      }
+    } else {
+      vistos.add(id);
+    }
+  }
+
+  res.json(jugadores);
+});
+
+// Mover jugador
+app.post("/api/mover", (req, res) => {
+  const { id, dx, dy } = req.body;
+  const jugador = jugadores[id];
+  if (!jugador) return res.status(404).json({ error: "Jugador no encontrado" });
+
+  const nuevoX = jugador.x + dx;
+  const nuevoY = jugador.y + dy;
+
+  if (
+    nuevoY >= 0 &&
+    nuevoY < mapa.length &&
+    nuevoX >= 0 &&
+    nuevoX < mapa[0].length &&
+    mapa[nuevoY][nuevoX] === 1
+  ) {
+    jugadores[id] = { x: nuevoX, y: nuevoY, lastUpdate: Date.now() };
+  }
+
+  res.json(jugadores[id]);
+});
+
+module.exports = app;
