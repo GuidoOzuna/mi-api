@@ -5,6 +5,16 @@ const size = 50;
 let mapa = [];
 let personaje = { x: 0, y: 0 };
 
+// Cargar imágenes desde la API
+const imgCesped = new Image();
+imgCesped.src = "/api/img/cesped.png";
+
+const imgMuro = new Image();
+imgMuro.src = "/api/img/muro.png";
+
+const imgPersonaje = new Image();
+imgPersonaje.src = "/api/img/personaje.png";
+
 // Cargar mapa desde la API
 fetch("/api/mapa")
   .then(res => res.json())
@@ -21,8 +31,7 @@ fetch("/api/mapa")
         if (mapa[y][x] === 0) {
           personaje.x = x;
           personaje.y = y;
-          // Convertir la celda inicial en césped para que no quede blanca
-          mapa[y][x] = 1;
+          mapa[y][x] = 1; // convertir en césped
         }
       }
     }
@@ -40,16 +49,19 @@ function dibujarMapa() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (let y = 0; y < mapa.length; y++) {
     for (let x = 0; x < mapa[y].length; x++) {
-      if (mapa[y][x] === 1) ctx.fillStyle = "green"; // césped
-      else if (mapa[y][x] === 2) ctx.fillStyle = "brown"; // muro
-      else ctx.fillStyle = "white"; // vacío
-      ctx.fillRect(x * size, y * size, size, size);
+      if (mapa[y][x] === 1) {
+        ctx.drawImage(imgCesped, x * size, y * size, size, size);
+      } else if (mapa[y][x] === 2) {
+        ctx.drawImage(imgMuro, x * size, y * size, size, size);
+      } else {
+        ctx.fillStyle = "white";
+        ctx.fillRect(x * size, y * size, size, size);
+      }
       ctx.strokeRect(x * size, y * size, size, size);
     }
   }
   // Dibujar personaje encima
-  ctx.fillStyle = "blue";
-  ctx.fillRect(personaje.x * size, personaje.y * size, size, size);
+  ctx.drawImage(imgPersonaje, personaje.x * size, personaje.y * size, size, size);
 }
 
 function mover(dx, dy) {
@@ -62,7 +74,6 @@ function mover(dx, dy) {
   dibujarMapa();
 }
 
-// Movimiento con teclado
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") mover(0, -1);
   if (e.key === "ArrowDown") mover(0, 1);
