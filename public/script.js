@@ -14,6 +14,13 @@ imgMuro.src = "/api/img/muro.png";
 const imgPersonaje = new Image();
 imgPersonaje.src = "/api/img/personaje.png";
 
+const menu = document.getElementById("menu");
+const inputNombre = document.getElementById("nombre");
+const btnStart = document.getElementById("btnStart");
+const mensaje = document.getElementById("mensaje");
+const listaJugadores = document.getElementById("jugadoresConectados");
+const controls = document.getElementById("controls");
+
 // Obtener o crear ID único por dispositivo
 function obtenerId() {
   let id = localStorage.getItem("miJugadorId");
@@ -30,17 +37,11 @@ function obtenerNombre() {
 }
 
 // Mostrar menú
-const menu = document.getElementById("menu");
-const inputNombre = document.getElementById("nombre");
-const btnStart = document.getElementById("btnStart");
-const mensaje = document.getElementById("mensaje");
-
 btnStart.addEventListener("click", () => {
   miId = obtenerId();
   miNombre = obtenerNombre();
 
   if (!miNombre) {
-    // primera vez → pedir nombre
     inputNombre.style.display = "block";
     if (inputNombre.value.trim() !== "") {
       miNombre = inputNombre.value.trim();
@@ -51,11 +52,10 @@ btnStart.addEventListener("click", () => {
     }
   }
 
-  // Ocultar menú y mostrar juego
   menu.style.display = "none";
   canvas.style.display = "block";
+  controls.style.display = "block";
 
-  // Registrar jugador en backend
   fetch("/api/jugadores", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -67,13 +67,22 @@ btnStart.addEventListener("click", () => {
   });
 });
 
-// Actualizar jugadores
+// Cargar mapa
+fetch("/api/mapa")
+  .then(res => res.json())
+  .then(data => {
+    mapa = data;
+    canvas.width = mapa[0].length * size;
+    canvas.height = mapa.length * size;
+  });
+
 function actualizarJugadores() {
   fetch("/api/jugadores")
     .then(res => res.json())
     .then(data => {
       jugadores = data;
       dibujarMapa();
+      mostrarListaJugadores();
     });
 }
 
@@ -93,6 +102,14 @@ function dibujarMapa() {
   }
 }
 
+function mostrarListaJugadores() {
+  listaJugadores.innerHTML = "<b>Jugadores conectados:</b><br>";
+  for (let id in jugadores) {
+    const nombre = id === miId ? miNombre : `Jugador ${id.slice(-4)}`;
+    listaJugadores.innerHTML += `• ${nombre}<br>`;
+  }
+}
+
 function mover(dx, dy) {
   fetch("/api/mover", {
     method: "POST",
@@ -101,21 +118,19 @@ function mover(dx, dy) {
   }).then(() => actualizarJugadores());
 }
 
+// Controles táctiles
+document.getElementById("up").addEventListener("click", () => mover(0, -1));
+document.getElementById("down").addEventListener("click", () => mover(0, 1));
+document.getElementById("left").addEventListener("click", () => mover(-1, 0));
+document.getElementById("right").addEventListener("click", () => mover(1, 0));
+
+// Controles con teclado
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") mover(0, -1);
   if (e.key === "ArrowDown") mover(0, 1);
   if (e.key === "ArrowLeft") mover(-1, 0);
   if (e.key === "ArrowRight") mover(1, 0);
 });
-
-// Cargar mapa
-fetch("/api/mapa")
-  .then(res => res.json())
-  .then(data => {
-    mapa = data;
-    canvas.width = mapa[0].length * size;
-    canvas.height = mapa.length * size;
-  });
 
 // Refrescar jugadores cada 2 segundos
 setInterval(actualizarJugadores, 2000);
