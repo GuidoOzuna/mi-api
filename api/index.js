@@ -9,8 +9,10 @@ app.use("/api/img", express.static(path.join(__dirname, "img")));
 app.get("/api/mapa", (req, res) => res.json(mapa));
 
 let jugadores = {};
-const TIEMPO_MAX = 30 * 1000; // 30 segundos
+let mensajes = []; // 🟢 lista de mensajes del chat
+const TIEMPO_MAX = 30 * 1000;
 
+// Generar posición aleatoria sobre césped (1)
 function generarPosicion() {
   let x, y;
   do {
@@ -32,18 +34,18 @@ app.post("/api/jugadores", (req, res) => {
     jugadores[id] = { ...generarPosicion(), nombre: nombre || "Jugador", lastUpdate: Date.now() };
   } else {
     jugadores[id].lastUpdate = Date.now();
-    if (nombre) jugadores[id].nombre = nombre; // actualizar nombre si lo manda
+    if (nombre) jugadores[id].nombre = nombre;
   }
 
   res.json({ id, pos: jugadores[id] });
 });
 
-// Obtener jugadores (limpia duplicados inactivos, no únicos)
+// Obtener jugadores (limpia duplicados inactivos)
 app.get("/api/jugadores", (req, res) => {
   const ahora = Date.now();
   const ids = Object.keys(jugadores);
-
   const vistos = new Set();
+
   for (let id of ids) {
     if (vistos.has(id)) {
       if (ahora - jugadores[id].lastUpdate > TIEMPO_MAX) {
@@ -79,6 +81,25 @@ app.post("/api/mover", (req, res) => {
   }
 
   res.json(jugadores[id]);
+});
+
+// 🟢 Chat: enviar mensaje
+app.post("/api/chat", (req, res) => {
+  const { nombre, texto } = req.body;
+  if (!texto || !nombre) return res.status(400).json({ error: "Falta nombre o texto" });
+
+  const mensaje = { nombre, texto, tiempo: Date.now() };
+  mensajes.push(mensaje);
+
+  // mantener solo los últimos 50 mensajes
+  if (mensajes.length > 50) mensajes.shift();
+
+  res.json({ ok: true });
+});
+
+// 🟢 Chat: obtener mensajes
+app.get("/api/chat", (req, res) => {
+  res.json(mensajes);
 });
 
 module.exports = app;
