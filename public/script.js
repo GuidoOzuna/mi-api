@@ -7,13 +7,23 @@ let jugadores = {};
 let miId = null;
 
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.jpeg";
+imgCesped.src = "/api/img/cesped.png";
 
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
 
 const imgPersonaje = new Image();
 imgPersonaje.src = "/api/img/personaje.png";
+
+// Obtener o crear ID único por dispositivo
+function obtenerId() {
+  let id = localStorage.getItem("miJugadorId");
+  if (!id) {
+    id = Date.now().toString() + Math.floor(Math.random() * 1000);
+    localStorage.setItem("miJugadorId", id);
+  }
+  return id;
+}
 
 // Cargar mapa y crear jugador
 fetch("/api/mapa")
@@ -23,7 +33,7 @@ fetch("/api/mapa")
     canvas.width = mapa[0].length * size;
     canvas.height = mapa.length * size;
 
-    miId = Date.now().toString();
+    miId = obtenerId();
     return fetch("/api/jugadores", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
