@@ -13,6 +13,7 @@ imgMuro.src = "/api/img/muro.png";
 const imgPersonaje = new Image();
 imgPersonaje.src = "/api/img/personaje.png";
 
+// Obtener o crear ID único por dispositivo
 function obtenerId() {
   let id = localStorage.getItem("miJugadorId");
   if (!id) {
@@ -22,6 +23,7 @@ function obtenerId() {
   return id;
 }
 
+// Cargar mapa y registrar jugador
 fetch("/api/mapa")
   .then(res => res.json())
   .then(data => {
@@ -36,7 +38,8 @@ fetch("/api/mapa")
       body: JSON.stringify({ id: miId })
     });
   })
-  .then(() => actualizarJugadores());
+  .then(() => actualizarJugadores())
+  .catch(err => console.error("Error:", err));
 
 function actualizarJugadores() {
   fetch("/api/jugadores")
