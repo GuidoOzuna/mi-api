@@ -18,7 +18,10 @@ const menu = document.getElementById("menu");
 const inputNombre = document.getElementById("nombre");
 const btnStart = document.getElementById("btnStart");
 const mensaje = document.getElementById("mensaje");
-const listaJugadores = document.getElementById("jugadoresConectados");
+const chat = document.getElementById("chat");
+const chatInput = document.getElementById("chatInput");
+const jugadoresBox = document.getElementById("jugadoresBox");
+const btnJugadores = document.getElementById("btnJugadores");
 const controls = document.getElementById("controls");
 
 // Obtener o crear ID único por dispositivo
@@ -36,7 +39,7 @@ function obtenerNombre() {
   return localStorage.getItem("miJugadorNombre");
 }
 
-// Mostrar menú
+// Menú de inicio
 btnStart.addEventListener("click", () => {
   miId = obtenerId();
   miNombre = obtenerNombre();
@@ -59,10 +62,10 @@ btnStart.addEventListener("click", () => {
   fetch("/api/jugadores", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id: miId })
+    body: JSON.stringify({ id: miId, nombre: miNombre })
   })
   .then(() => {
-    mensaje.textContent = `Jugador ${miNombre} conectado`;
+    enviarMensaje(`🟢 ${miNombre} se ha conectado`);
     actualizarJugadores();
   });
 });
@@ -82,7 +85,6 @@ function actualizarJugadores() {
     .then(data => {
       jugadores = data;
       dibujarMapa();
-      mostrarListaJugadores();
     });
 }
 
@@ -99,14 +101,6 @@ function dibujarMapa() {
   for (let id in jugadores) {
     const p = jugadores[id];
     ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
-  }
-}
-
-function mostrarListaJugadores() {
-  listaJugadores.innerHTML = "<b>Jugadores conectados:</b><br>";
-  for (let id in jugadores) {
-    const nombre = id === miId ? miNombre : `Jugador ${id.slice(-4)}`;
-    listaJugadores.innerHTML += `• ${nombre}<br>`;
   }
 }
 
@@ -132,5 +126,49 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") mover(1, 0);
 });
 
-// Refrescar jugadores cada 2 segundos
+// Chat conectado al backend
+function enviarMensaje(texto) {
+  fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nombre: miNombre, texto })
+  });
+}
+
+function actualizarChat() {
+  fetch("/api/chat")
+    .then(res => res.json())
+    .then(data => {
+      chat.innerHTML = data.map(m => `<div>💬 <b>${m.nombre}:</b> ${m.texto}</div>`).join("");
+      chat.scrollTop = chat.scrollHeight;
+    });
+}
+
+chatInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && chatInput.value.trim() !== "") {
+    enviarMensaje(chatInput.value.trim());
+    chatInput.value = "";
+  }
+});
+
+// Botón jugadores
+btnJugadores.addEventListener("click", () => {
+  if (jugadoresBox.style.display === "none") {
+    jugadoresBox.style.display = "block";
+    mostrarListaJugadores();
+  } else {
+    jugadoresBox.style.display = "none";
+  }
+});
+
+function mostrarListaJugadores() {
+  jugadoresBox.innerHTML = "<b>Jugadores conectados:</b><br>";
+  for (let id in jugadores) {
+    const nombre = jugadores[id].nombre || `Jugador ${id.slice(-4)}`;
+    jugadoresBox.innerHTML += `• ${nombre}<br>`;
+  }
+}
+
+// Intervalos de actualización
 setInterval(actualizarJugadores, 2000);
+setInterval(actualizarChat, 2000);
