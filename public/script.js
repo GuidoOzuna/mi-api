@@ -7,15 +7,12 @@ let jugadores = {};
 let miId = null;
 
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.jpeg";
-
+imgCesped.src = "/api/img/cesped.png";
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
-
 const imgPersonaje = new Image();
 imgPersonaje.src = "/api/img/personaje.png";
 
-// Obtener o crear ID único por dispositivo
 function obtenerId() {
   let id = localStorage.getItem("miJugadorId");
   if (!id) {
@@ -25,7 +22,6 @@ function obtenerId() {
   return id;
 }
 
-// Cargar mapa y crear jugador
 fetch("/api/mapa")
   .then(res => res.json())
   .then(data => {
@@ -40,8 +36,7 @@ fetch("/api/mapa")
       body: JSON.stringify({ id: miId })
     });
   })
-  .then(() => actualizarJugadores())
-  .catch(err => console.error("Error:", err));
+  .then(() => actualizarJugadores());
 
 function actualizarJugadores() {
   fetch("/api/jugadores")
@@ -73,8 +68,7 @@ function mover(dx, dy) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: miId, dx, dy })
-  })
-    .then(() => actualizarJugadores());
+  }).then(() => actualizarJugadores());
 }
 
 document.addEventListener("keydown", (e) => {
