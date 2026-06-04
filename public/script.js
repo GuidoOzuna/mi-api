@@ -6,7 +6,7 @@ let mapa = [];
 let jugadores = {};
 
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.png";
+imgCesped.src = "/api/img/cesped.jpeg";
 
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
