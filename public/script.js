@@ -7,7 +7,7 @@ let personaje = { x: 0, y: 0 };
 
 // Cargar imágenes desde la API
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.png";
+imgCesped.src = "/api/img/cesped.jpeg";
 
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
