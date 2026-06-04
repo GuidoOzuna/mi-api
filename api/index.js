@@ -8,21 +8,24 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Servir imágenes
+// Servir imágenes desde /api/img
 app.use("/api/img", express.static(path.join(__dirname, "img")));
 
-// Endpoint para mapa
+// Endpoint para el mapa
 app.get("/api/mapa", (req, res) => {
   res.json(mapa);
 });
 
-// Función para generar posición aleatoria sobre césped
-function generarPosicion() {
+// Generar posición aleatoria sobre césped (1)
+function generarPosicion(jugadores) {
   let x, y;
   do {
     y = Math.floor(Math.random() * mapa.length);
     x = Math.floor(Math.random() * mapa[0].length);
-  } while (mapa[y][x] !== 1); // solo césped
+  } while (
+    mapa[y][x] !== 1 ||
+    Object.values(jugadores).some(p => p.x === x && p.y === y)
+  );
   return { x, y };
 }
 
@@ -32,26 +35,25 @@ io.on("connection", (socket) => {
   console.log("Jugador conectado:", socket.id);
 
   // Asignar posición inicial aleatoria
-  let pos = generarPosicion();
+  const pos = generarPosicion(jugadores);
   jugadores[socket.id] = pos;
 
-  // Enviar lista de jugadores a todos
   io.emit("jugadores", jugadores);
 
-  // Escuchar movimiento
+  // Movimiento del jugador
   socket.on("mover", (dir) => {
-    let jugador = jugadores[socket.id];
+    const jugador = jugadores[socket.id];
     if (!jugador) return;
 
-    let nuevoX = jugador.x + dir.dx;
-    let nuevoY = jugador.y + dir.dy;
+    const nuevoX = jugador.x + dir.dx;
+    const nuevoY = jugador.y + dir.dy;
 
     if (
       nuevoY >= 0 &&
       nuevoY < mapa.length &&
       nuevoX >= 0 &&
       nuevoX < mapa[0].length &&
-      mapa[nuevoY][nuevoX] === 1 // solo césped
+      mapa[nuevoY][nuevoX] === 1
     ) {
       jugadores[socket.id] = { x: nuevoX, y: nuevoY };
       io.emit("jugadores", jugadores);
