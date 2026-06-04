@@ -24,6 +24,20 @@ const jugadoresBox = document.getElementById("jugadoresBox");
 const btnJugadores = document.getElementById("btnJugadores");
 const controls = document.getElementById("controls");
 
+// 🔒 Botón para resetear jugadores (solo visible para vos)
+const btnReset = document.createElement("button");
+btnReset.textContent = "Reset jugadores";
+btnReset.style.position = "absolute";
+btnReset.style.top = "370px";
+btnReset.style.right = "10px";
+btnReset.style.background = "#900";
+btnReset.style.color = "white";
+btnReset.style.border = "2px solid #f00";
+btnReset.style.padding = "5px 10px";
+btnReset.style.borderRadius = "5px";
+btnReset.style.display = "none"; // oculto por defecto
+document.body.appendChild(btnReset);
+
 // Obtener o crear ID único por dispositivo
 function obtenerId() {
   let id = localStorage.getItem("miJugadorId");
@@ -58,6 +72,16 @@ btnStart.addEventListener("click", () => {
   menu.style.display = "none";
   canvas.style.display = "block";
   controls.style.display = "block";
+
+  // Mostrar chat y botón jugadores solo después de iniciar
+  chat.style.display = "block";
+  chatInput.style.display = "block";
+  btnJugadores.style.display = "block";
+
+  // Mostrar botón reset solo si sos Guido
+  if (miNombre.toLowerCase() === "guido") {
+    btnReset.style.display = "block";
+  }
 
   fetch("/api/jugadores", {
     method: "POST",
@@ -168,6 +192,14 @@ function mostrarListaJugadores() {
     jugadoresBox.innerHTML += `• ${nombre}<br>`;
   }
 }
+
+// 🔄 Reset jugadores (solo vos)
+btnReset.addEventListener("click", () => {
+  if (miNombre.toLowerCase() === "guido") {
+    fetch("/api/reset", { method: "POST" })
+      .then(() => enviarMensaje("⚠️ Guido ha reseteado los jugadores"));
+  }
+});
 
 // Intervalos de actualización
 setInterval(actualizarJugadores, 2000);
