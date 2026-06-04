@@ -60,6 +60,7 @@ function mover(dx, dy) {
   dibujarMapa();
 }
 
+// Movimiento con teclado
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") mover(0, -1);
   if (e.key === "ArrowDown") mover(0, 1);
