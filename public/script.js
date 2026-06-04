@@ -6,7 +6,7 @@ let mapa = [];
 let jugadores = {};
 
 const imgCesped = new Image();
-imgCesped.src = "/api/img/cesped.jpeg";
+imgCesped.src = "/api/img/cesped.png";
 
 const imgMuro = new Image();
 imgMuro.src = "/api/img/muro.png";
@@ -23,15 +23,22 @@ socket.on("jugadores", (data) => {
   dibujarMapa();
 });
 
-// Cargar mapa desde API
+// Cargar mapa desde la API
 fetch("/api/mapa")
   .then(res => res.json())
   .then(data => {
     mapa = data;
     canvas.width = mapa[0].length * size;
     canvas.height = mapa.length * size;
-    dibujarMapa();
-  });
+
+    // Esperar a que las imágenes se carguen antes de dibujar
+    Promise.all([
+      new Promise(res => imgCesped.onload = res),
+      new Promise(res => imgMuro.onload = res),
+      new Promise(res => imgPersonaje.onload = res)
+    ]).then(() => dibujarMapa());
+  })
+  .catch(err => console.error("Error cargando mapa:", err));
 
 function dibujarMapa() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -45,7 +52,7 @@ function dibujarMapa() {
   }
   // Dibujar todos los jugadores
   for (let id in jugadores) {
-    let p = jugadores[id];
+    const p = jugadores[id];
     ctx.drawImage(imgPersonaje, p.x * size, p.y * size, size, size);
   }
 }
