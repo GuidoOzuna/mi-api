@@ -1,7 +1,6 @@
 {
-  "name": "mi-juego",
+  "name": "mi-google-raro",
   "version": "1.0.0",
-  "description": "Juego simple con Node.js API y frontend en Vercel",
   "main": "api/index.js",
   "scripts": {
     "start": "node api/index.js"
