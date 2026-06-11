@@ -7,35 +7,19 @@
     #buscador { margin-top: 20%; }
     #resultados { margin-top: 20px; }
     .arriba { margin-top: 20px !important; }
+    #sugerencias { margin-top: 10px; }
+    .sugerencia { cursor: pointer; padding: 5px; }
+    .sugerencia:hover { background: #eee; }
   </style>
 </head>
 <body>
   <div id="buscador">
-    <input type="text" id="query" placeholder="Buscar..." />
+    <input type="text" id="query" placeholder="Buscar..." oninput="sugerir()"/>
     <button onclick="buscar()">Buscar</button>
+    <div id="sugerencias"></div>
   </div>
   <div id="resultados"></div>
 
-  <script>
-    async function buscar() {
-      const q = document.getElementById("query").value;
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
-      const data = await res.json();
-
-      // mover buscador arriba
-      document.getElementById("buscador").classList.add("arriba");
-
-      // mostrar resultados
-      const div = document.getElementById("resultados");
-      div.innerHTML = "";
-      if (data.length === 0) {
-        div.innerHTML = "<p>No se encontraron resultados</p>";
-      } else {
-        data.forEach(r => {
-          div.innerHTML += `<p><a href="${r.url}" target="_blank">${r.titulo}</a></p>`;
-        });
-      }
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
