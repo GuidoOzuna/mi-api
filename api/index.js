@@ -2,15 +2,21 @@ const express = require("express");
 const fs = require("fs");
 const app = express();
 
-app.get("/api/search", (req, res) => {
-  const q = (req.query.q || "").toLowerCase();
-  const data = JSON.parse(fs.readFileSync("data.json"));
+app.use(express.json());
 
-  // Si no hay texto, no devuelve nada
-  if (!q) return res.json([]);
+let mensajes = []; // memoria simple en servidor
 
-  const resultados = data.filter(p => p.nombre.toLowerCase().includes(q));
-  res.json(resultados);
+// recibir mensaje
+app.post("/api/chat", (req, res) => {
+  const { id, nombre, texto } = req.body;
+  const msg = { id, nombre, texto, fecha: new Date().toISOString() };
+  mensajes.push(msg);
+  res.json({ ok: true });
+});
+
+// obtener mensajes
+app.get("/api/chat", (req, res) => {
+  res.json(mensajes);
 });
 
 module.exports = app;
