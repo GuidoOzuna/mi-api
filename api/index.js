@@ -5,6 +5,10 @@ const app = express();
 app.get("/api/search", (req, res) => {
   const q = (req.query.q || "").toLowerCase();
   const data = JSON.parse(fs.readFileSync("data.json"));
+
+  // Si no hay texto, no devuelve nada
+  if (!q) return res.json([]);
+
   const resultados = data.filter(p => p.nombre.toLowerCase().includes(q));
   res.json(resultados);
 });
