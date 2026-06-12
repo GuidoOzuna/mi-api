@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Mi Google Raro</title>
+  <title>Chat Raro</title>
   <style>
     body { font-family: Arial; text-align: center; }
-    #buscador { margin-top: 20%; }
-    #resultados { margin-top: 20px; }
-    .arriba { margin-top: 20px !important; }
-    #sugerencias { margin-top: 10px; max-width: 300px; margin-left: auto; margin-right: auto; border: 1px solid #ccc; background: #fff; }
-    .sugerencia { cursor: pointer; padding: 5px; text-align: left; }
-    .sugerencia:hover { background: #eee; }
+    #login { margin-top: 20%; }
+    #chat { display: none; margin-top: 20px; }
+    #mensajes { border: 1px solid #ccc; height: 300px; overflow-y: scroll; text-align: left; padding: 10px; }
   </style>
 </head>
 <body>
-  <div id="buscador">
-    <input type="text" id="query" placeholder="Buscar..." oninput="sugerir()"/>
-    <button onclick="buscar()">Buscar</button>
-    <div id="sugerencias"></div>
+  <div id="login">
+    <h2>Ingresa tu nombre</h2>
+    <input type="text" id="nombre" placeholder="Tu nombre"/>
+    <button onclick="entrar()">Entrar</button>
   </div>
-  <div id="resultados"></div>
+
+  <div id="chat">
+    <h2>Chat</h2>
+    <div id="mensajes"></div>
+    <input type="text" id="texto" placeholder="Escribe un mensaje"/>
+    <button onclick="enviar()">Enviar</button>
+  </div>
 
   <script src="script.js"></script>
 </body>
