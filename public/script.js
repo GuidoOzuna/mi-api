@@ -7,11 +7,15 @@ let nombre = localStorage.getItem("chat_nombre");
 
 function entrar() {
   nombre = document.getElementById("nombre").value;
-  if (!nombre) return alert("Ingresa un nombre");
+  if (!nombre) {
+    alert("Ingresa un nombre");
+    return;
+  }
   localStorage.setItem("chat_nombre", nombre);
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "block";
   cargarMensajes();
+  setInterval(cargarMensajes, 2000); // refrescar cada 2s
 }
 
 async function enviar() {
@@ -36,10 +40,14 @@ async function cargarMensajes() {
   });
 }
 
+// conectar botones
+document.getElementById("btnEntrar").addEventListener("click", entrar);
+document.getElementById("btnEnviar").addEventListener("click", enviar);
+
 // si ya hay nombre guardado, entrar directo
 if (nombre) {
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "block";
   cargarMensajes();
-  setInterval(cargarMensajes, 2000); // refrescar cada 2s
+  setInterval(cargarMensajes, 2000);
 }
