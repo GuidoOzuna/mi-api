@@ -18,10 +18,16 @@ async function buscar() {
 
 async function sugerir() {
   const q = document.getElementById("query").value;
+  const sugDiv = document.getElementById("sugerencias");
+
+  if (!q) {
+    sugDiv.innerHTML = "";
+    return;
+  }
+
   const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
   const data = await res.json();
 
-  const sugDiv = document.getElementById("sugerencias");
   sugDiv.innerHTML = "";
   data.forEach(r => {
     const sug = document.createElement("div");
@@ -30,6 +36,7 @@ async function sugerir() {
     sug.onclick = () => {
       document.getElementById("query").value = r.nombre;
       buscar();
+      sugDiv.innerHTML = ""; // limpiar sugerencias al elegir
     };
     sugDiv.appendChild(sug);
   });
