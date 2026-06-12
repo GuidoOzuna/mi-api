@@ -6,14 +6,17 @@ if (!id) {
 let nombre = localStorage.getItem("chat_nombre");
 
 function entrar() {
-  nombre = document.getElementById("nombre").value;
-  if (!nombre) {
+  const inputNombre = document.getElementById("nombre").value;
+  if (!inputNombre) {
     alert("Ingresa un nombre");
     return;
   }
+  nombre = inputNombre;
   localStorage.setItem("chat_nombre", nombre);
+
   document.getElementById("login").style.display = "none";
   document.getElementById("chat").style.display = "block";
+
   cargarMensajes();
   setInterval(cargarMensajes, 2000); // refrescar cada 2s
 }
@@ -40,14 +43,16 @@ async function cargarMensajes() {
   });
 }
 
-// conectar botones
-document.getElementById("btnEntrar").addEventListener("click", entrar);
-document.getElementById("btnEnviar").addEventListener("click", enviar);
+// conectar botones cuando el DOM ya está listo
+window.onload = () => {
+  document.getElementById("btnEntrar").addEventListener("click", entrar);
+  document.getElementById("btnEnviar").addEventListener("click", enviar);
 
-// si ya hay nombre guardado, entrar directo
-if (nombre) {
-  document.getElementById("login").style.display = "none";
-  document.getElementById("chat").style.display = "block";
-  cargarMensajes();
-  setInterval(cargarMensajes, 2000);
-}
+  // si ya hay nombre guardado, entrar directo
+  if (nombre) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chat").style.display = "block";
+    cargarMensajes();
+    setInterval(cargarMensajes, 2000);
+  }
+};
