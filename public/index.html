@@ -1,29 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <title>Chat Raro</title>
-  <style>
-    body { font-family: Arial; text-align: center; }
-    #login { margin-top: 20%; }
-    #chat { display: none; margin-top: 20px; }
-    #mensajes { border: 1px solid #ccc; height: 300px; overflow-y: scroll; text-align: left; padding: 10px; }
-  </style>
+  <meta charset="UTF-8">
+  <title>Trivia Twitch</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="login">
-    <h2>Ingresa tu nombre</h2>
-    <input type="text" id="nombre" placeholder="Tu nombre"/>
-    <button id="btnEntrar">Entrar</button>
-  </div>
+  <h1>Trivia Twitch</h1>
+  <div id="pregunta"></div>
+  <div id="opciones"></div>
+  <h2>Jugadores activos:</h2>
+  <div id="jugadores"></div>
 
-  <div id="chat">
-    <h2>Chat</h2>
-    <div id="mensajes"></div>
-    <input type="text" id="texto" placeholder="Escribe un mensaje"/>
-    <button id="btnEnviar">Enviar</button>
-  </div>
+  <script>
+    async function actualizar() {
+      const res = await fetch("/estado");
+      const data = await res.json();
 
-  <!-- el script va al final para que el DOM ya exista -->
-  <script src="script.js"></script>
+      document.getElementById("pregunta").innerText = data.pregunta;
+      document.getElementById("opciones").innerText = data.opciones.join(" | ");
+      document.getElementById("jugadores").innerText = data.jugadores.join(", ");
+    }
+
+    setInterval(actualizar, 3000); // refresca cada 3 segundos
+  </script>
 </body>
 </html>
