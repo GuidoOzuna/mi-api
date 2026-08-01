@@ -7,14 +7,17 @@
 </head>
 <body>
   <h1>Trivia Diario</h1>
+
   <div id="registro">
     <input id="nombre" placeholder="Tu nombre">
     <button onclick="registrar()">Entrar</button>
   </div>
 
-  <div id="pregunta"></div>
-  <div id="opciones"></div>
-  <div id="ranking"></div>
+  <div id="juego" style="display:none;">
+    <div id="pregunta"></div>
+    <div id="opciones"></div>
+    <div id="ranking"></div>
+  </div>
 
   <script>
     let id = localStorage.getItem("id") || Math.random().toString(36).substring(2);
@@ -29,8 +32,9 @@
       });
       const data = await res.json();
       if (data.ok) {
-        document.getElementById("registro").style.display = "none"; // ocultar registro
-        cargarPregunta(); // mostrar primera pregunta
+        document.getElementById("registro").style.display = "none";
+        document.getElementById("juego").style.display = "block";
+        cargarPregunta();
       }
     }
 
