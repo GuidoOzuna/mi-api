@@ -11,7 +11,7 @@ let jugadores = {}; // { id: { nombre, puntos, respuestasHoy, ultimaFecha } }
 let preguntas = [
   { texto: "Capital de Paraguay", opciones: ["A) Asunción","B) Encarnación","C) Ciudad del Este"], correcta: "A" },
   { texto: "2+2", opciones: ["A) 3","B) 4","C) 5"], correcta: "B" },
-  // ... agrega más preguntas
+  { texto: "Color de la bandera de Paraguay", opciones: ["A) Rojo, blanco y azul","B) Verde y amarillo","C) Negro y rojo"], correcta: "A" }
 ];
 
 // Registro de jugador
