@@ -1,9 +1,4 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #111;
-  color: #eee;
-}
-h1 {
-  color: #0f0;
-}
+/* public/style.css */
+body { font-family: Arial; text-align:center; background:#111; color:#eee; }
+button { margin:5px; padding:10px; }
+h1 { color:#0f0; }
