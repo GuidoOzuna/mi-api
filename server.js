@@ -42,8 +42,11 @@ app.post("/respuesta", (req,res) => {
   const jugador = jugadores[id];
   if (!jugador) return res.json({ error:"No registrado" });
 
-  const pregunta = preguntas.find(p => p.correcta === opcion);
-  if (pregunta) jugador.puntos++;
+  // compara directamente con la correcta
+  const ultimaPregunta = preguntas.find(p => p.correcta === opcion);
+  if (ultimaPregunta && ultimaPregunta.correcta === opcion) {
+    jugador.puntos++;
+  }
   jugador.respuestasHoy++;
   res.json({ puntos: jugador.puntos });
 });
