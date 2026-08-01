@@ -38,17 +38,20 @@
     async function cargarPregunta() {
       const res = await fetch("/pregunta/"+id);
       const data = await res.json();
+
       if (data.error) {
         document.getElementById("pregunta").innerText = data.error;
         document.getElementById("opciones").innerHTML = "";
         return;
       }
+
       document.getElementById("pregunta").innerText = data.texto;
       document.getElementById("opciones").innerHTML = "";
+
       data.opciones.forEach(o => {
         const btn = document.createElement("button");
         btn.innerText = o;
-        btn.onclick = () => responder(o[0]); // usa la letra A/B/C
+        btn.onclick = () => responder(o[0]); // usa la letra inicial A/B/C
         document.getElementById("opciones").appendChild(btn);
       });
     }
