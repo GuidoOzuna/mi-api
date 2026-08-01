@@ -1,4 +1,3 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,65 +11,68 @@
     <input id="nombre" placeholder="Tu nombre">
     <button onclick="registrar()">Entrar</button>
   </div>
+
   <div id="pregunta"></div>
   <div id="opciones"></div>
   <div id="ranking"></div>
 
- <script>
-  let id = localStorage.getItem("id") || Math.random().toString(36).substring(2);
-  localStorage.setItem("id", id);
+  <script>
+    let id = localStorage.getItem("id") || Math.random().toString(36).substring(2);
+    localStorage.setItem("id", id);
 
-  async function registrar() {
-    const nombre = document.getElementById("nombre").value;
-    const res = await fetch("/registrar", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({id,nombre})
-    });
-    const data = await res.json();
-    if (data.ok) {
-      cargarPregunta(); // ahora sí carga la primera pregunta
+    async function registrar() {
+      const nombre = document.getElementById("nombre").value;
+      const res = await fetch("/registrar", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id,nombre})
+      });
+      const data = await res.json();
+      if (data.ok) {
+        document.getElementById("registro").style.display = "none"; // ocultar registro
+        cargarPregunta(); // mostrar primera pregunta
+      }
     }
-  }
 
-  async function cargarPregunta() {
-    const res = await fetch("/pregunta/"+id);
-    const data = await res.json();
+    async function cargarPregunta() {
+      const res = await fetch("/pregunta/"+id);
+      const data = await res.json();
 
-    if (data.error) {
-      document.getElementById("pregunta").innerText = data.error;
+      if (data.error) {
+        document.getElementById("pregunta").innerText = data.error;
+        document.getElementById("opciones").innerHTML = "";
+        return;
+      }
+
+      document.getElementById("pregunta").innerText = data.texto;
       document.getElementById("opciones").innerHTML = "";
-      return;
+
+      data.opciones.forEach(o => {
+        const btn = document.createElement("button");
+        btn.innerText = o;
+        btn.onclick = () => responder(o[0]); // usa la letra A/B/C
+        document.getElementById("opciones").appendChild(btn);
+      });
     }
 
-    document.getElementById("pregunta").innerText = data.texto;
-    document.getElementById("opciones").innerHTML = "";
+    async function responder(opcion) {
+      const res = await fetch("/respuesta", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({id,opcion})
+      });
+      const data = await res.json();
+      document.getElementById("pregunta").innerText = "Tu puntaje: " + data.puntos;
+      document.getElementById("opciones").innerHTML = "";
+      cargarRanking();
+    }
 
-    data.opciones.forEach(o => {
-      const btn = document.createElement("button");
-      btn.innerText = o;
-      btn.onclick = () => responder(o[0]); // usa la letra A/B/C
-      document.getElementById("opciones").appendChild(btn);
-    });
-  }
-
-  async function responder(opcion) {
-    const res = await fetch("/respuesta", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({id,opcion})
-    });
-    const data = await res.json();
-    document.getElementById("pregunta").innerText = "Tu puntaje: " + data.puntos;
-    cargarRanking();
-  }
-
-  async function cargarRanking() {
-    const res = await fetch("/ranking");
-    const data = await res.json();
-    document.getElementById("ranking").innerText =
-      "Ranking semanal:\n" + data.map(j => j.nombre+" - "+j.puntos+" pts").join("\n");
-  }
-</script>
+    async function cargarRanking() {
+      const res = await fetch("/ranking");
+      const data = await res.json();
+      document.getElementById("ranking").innerText =
+        "Ranking semanal:\n" + data.map(j => j.nombre+" - "+j.puntos+" pts").join("\n");
+    }
+  </script>
 </body>
 </html>
