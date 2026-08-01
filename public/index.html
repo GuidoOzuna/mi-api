@@ -25,32 +25,26 @@
 
     async function registrar() {
       const nombre = document.getElementById("nombre").value;
-      const res = await fetch("/registrar", {
+      await fetch("/registrar", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({id,nombre})
       });
-      const data = await res.json();
-      if (data.ok) {
-        document.getElementById("registro").style.display = "none";
-        document.getElementById("juego").style.display = "block";
-        cargarPregunta();
-      }
+      document.getElementById("registro").style.display = "none";
+      document.getElementById("juego").style.display = "block";
+      cargarPregunta();
     }
 
     async function cargarPregunta() {
       const res = await fetch("/pregunta/"+id);
       const data = await res.json();
-
       if (data.error) {
         document.getElementById("pregunta").innerText = data.error;
         document.getElementById("opciones").innerHTML = "";
         return;
       }
-
       document.getElementById("pregunta").innerText = data.texto;
       document.getElementById("opciones").innerHTML = "";
-
       data.opciones.forEach(o => {
         const btn = document.createElement("button");
         btn.innerText = o;
