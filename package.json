@@ -1,17 +1,11 @@
 {
   "name": "mi-juego-express",
   "version": "1.0.0",
-  "description": "Juego simple en Node.js + Express desplegado en Vercel",
-  "main": "api/game.js",
   "type": "module",
   "scripts": {
-    "start": "node api/game.js",
-    "dev": "nodemon api/game.js"
+    "start": "node api/game.js"
   },
   "dependencies": {
     "express": "^4.18.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
   }
 }
