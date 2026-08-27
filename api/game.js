@@ -1,5 +1,4 @@
 import express from "express";
-
 const app = express();
 
 app.get("/api/game", (req, res) => {
