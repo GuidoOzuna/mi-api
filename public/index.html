@@ -2,78 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Trivia Diario</title>
+  <title>Juego en Node.js Express</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Trivia Diario</h1>
-
-  <div id="registro">
-    <input id="nombre" placeholder="Tu nombre">
-    <button onclick="registrar()">Entrar</button>
-  </div>
-
-  <div id="juego" style="display:none;">
-    <div id="pregunta"></div>
-    <div id="opciones"></div>
-    <div id="ranking"></div>
-  </div>
-
-  <script>
-    let id = localStorage.getItem("id") || Math.random().toString(36).substring(2);
-    localStorage.setItem("id", id);
-
-    async function registrar() {
-      const nombre = document.getElementById("nombre").value;
-      await fetch("/registrar", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id,nombre})
-      });
-      document.getElementById("registro").style.display = "none";
-      document.getElementById("juego").style.display = "block";
-      cargarPregunta();
-    }
-
-    async function cargarPregunta() {
-      const res = await fetch("/pregunta/"+id);
-      const data = await res.json();
-
-      if (data.error) {
-        document.getElementById("pregunta").innerText = data.error;
-        document.getElementById("opciones").innerHTML = "";
-        return;
-      }
-
-      document.getElementById("pregunta").innerText = data.texto;
-      document.getElementById("opciones").innerHTML = "";
-
-      data.opciones.forEach(o => {
-        const btn = document.createElement("button");
-        btn.innerText = o;
-        btn.onclick = () => responder(o[0]); // usa la letra inicial A/B/C
-        document.getElementById("opciones").appendChild(btn);
-      });
-    }
-
-    async function responder(opcion) {
-      const res = await fetch("/respuesta", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({id,opcion})
-      });
-      const data = await res.json();
-      document.getElementById("pregunta").innerText = "Tu puntaje: " + data.puntos;
-      document.getElementById("opciones").innerHTML = "";
-      cargarRanking();
-    }
-
-    async function cargarRanking() {
-      const res = await fetch("/ranking");
-      const data = await res.json();
-      document.getElementById("ranking").innerText =
-        "Ranking semanal:\n" + data.map(j => j.nombre+" - "+j.puntos+" pts").join("\n");
-    }
-  </script>
+  <h1>Juego en Node.js + Express 🚀</h1>
+  <canvas id="game" width="250" height="250"></canvas>
+  <script src="script.js"></script>
 </body>
 </html>
