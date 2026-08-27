@@ -1,7 +1,5 @@
-import express from "express";
-const app = express();
-
-app.get("/api/game", (req, res) => {
+// No uses app.listen() en Vercel
+export default function handler(req, res) {
   const mapa = [
     [1,1,1,1,1],
     [1,1,1,2,1],
@@ -9,7 +7,5 @@ app.get("/api/game", (req, res) => {
     [1,2,1,1,1],
     [1,1,1,1,1]
   ];
-  res.json({ mapa });
-});
-
-export default app;
+  res.status(200).json({ mapa });
+}
