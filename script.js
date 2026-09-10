@@ -1,17 +1,26 @@
-// Lista de imágenes directamente en JS
-const imagenes = [
-  { src: "/img/foto1.jpg", title: "Paisaje" },
-  { src: "/img/foto2.jpg", title: "Ciudad" },
-  { src: "/img/foto3.jpg", title: "Montaña" }
-];
+// Cargar datos desde data.json
+fetch("data.json")
+  .then(res => res.json())
+  .then(data => {
+    const contenedor = document.getElementById("contenido");
 
-// Inyectar imágenes en el DOM
-window.addEventListener("DOMContentLoaded", () => {
-  const galeria = document.getElementById("galeria");
-  imagenes.forEach(img => {
-    const image = document.createElement("img");
-    image.src = img.src;   // Ojo: siempre /img/... porque está en public/img
-    image.alt = img.title;
-    galeria.appendChild(image);
-  });
-});
+    data.forEach(section => {
+      // Crear título
+      const h1 = document.createElement("h1");
+      h1.textContent = section.title;
+      contenedor.appendChild(h1);
+
+      // Crear párrafo con links en lista
+      const p = document.createElement("p");
+      section.links.forEach(link => {
+        const a = document.createElement("a");
+        a.href = link.url;
+        a.textContent = link.text;
+        a.target = "_blank"; // abrir en nueva pestaña
+        p.appendChild(a);
+        p.appendChild(document.createElement("br")); // salto de línea
+      });
+      contenedor.appendChild(p);
+    });
+  })
+  .catch(err => console.error("Error cargando JSON:", err));

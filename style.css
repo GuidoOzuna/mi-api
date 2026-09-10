@@ -1,18 +1,24 @@
 body {
   font-family: Arial, sans-serif;
-  background: #f4f4f4;
-  text-align: center;
+  background: #fafafa;
+  padding: 20px;
+  line-height: 1.6;
 }
 
-#galeria {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+h1 {
+  margin-top: 30px;
+  color: #333;
 }
 
-#galeria img {
-  margin: 10px;
-  width: 200px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+p {
+  margin: 10px 0;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
