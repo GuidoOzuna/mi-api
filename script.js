@@ -1,11 +1,11 @@
-// Cargar imágenes desde la API de Vercel
+// Consumir la API de Vercel
 fetch("/api/galeria")
   .then(res => res.json())
   .then(data => {
     const galeria = document.getElementById("galeria");
     data.forEach(img => {
       const image = document.createElement("img");
-      image.src = img.src;
+      image.src = img.src;   // Debe ser /img/fotoX.jpg
       image.alt = img.title;
       galeria.appendChild(image);
     });
